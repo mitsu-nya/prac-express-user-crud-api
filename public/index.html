@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html lang="ja">
+    <head>
+        <meta charset="UTF-8" />
+        <title>ユーザ管理api開発</title>
+    </head>
+    <body>
+        <h1>ポートフォリオ_ユーザ管理</h1>
+
+        <pre id="resultview"></pre>
+
+        <h2>ユーザ一覧</h2>
+        <div id="getusersview"></div>
+        <!-- <button id="getusers">取得</button> -->
+
+        <h2>ユーザ登録・編集</h2>
+        <form id="usercreatefrom">
+            <div>
+                <input type="hidden" id="userid" />
+            </div>
+            <div>
+                <label for="username">名前</label>
+                <input type="text" id="username" />
+            </div>
+            <div>
+                <label for="useremail">メールアドレス</label>
+                <input type="email" id="useremail" />
+            </div>
+            <button type="submit">登録・編集</button>
+        </form>
+    </body>
+
+    <script src="./js/index.js"></script>
+</html>
