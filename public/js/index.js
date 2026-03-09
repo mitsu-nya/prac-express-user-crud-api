@@ -1,17 +1,18 @@
-//const { json } = require("express");
 async function message(msg){
+    const resultview = document.getElementById("resultview");
+
     const msg1 = "ユーザを登録しました";
     const msg2 = "ユーザを更新しました";
     const msg3 = "ユーザを削除しました";
 
     if(msg === "User Create"){
-        resultview.innerHTML = `<p style="font-size: 20px color: red">${msg1}<p>`;
+        resultview.innerHTML = `<p style="font-size: 20px color: red">${msg1}</p>`;
     }else if( msg === "User Update"){
-        resultview.innerHTML = `<p style="font-size: 20px color: red">${msg2}<p>`;
+        resultview.innerHTML = `<p style="font-size: 20px color: red">${msg2}</p>`;
     }else if( msg === "User delete"){
-        resultview.innerHTML = `<p style="font-size: 20px color: red">${msg3}<p>`;
+        resultview.innerHTML = `<p style="font-size: 20px color: red">${msg3}</p>`;
     }else{
-        resultview.innerHTML = `<p style="font-size: 20px color: red">失敗しました<p>`;
+        resultview.innerHTML = `<p style="font-size: 20px color: red">失敗しました</p>`;
     }
 }
 
@@ -22,19 +23,19 @@ async function loadUsers() {
 
     const rows = json.map(item => `
             <tr>
-                <td>${item.id}</td>
                 <td>${item.name}</td>
                 <td>${item.email}</td>
+                <td>${item.age}</td>
                 <td><button class="editBtn" data-id="${item.id}">編集</button></td>
-                <td><button class="deleBtn" data-id="${item.id}">削除</button></td>
+                <td><button class="deleBtn" data-id="${item.id}" data-name="${item.name}">削除</button></td>
             </tr>
         `).join("");
     
     view.innerHTML = `<table>
                             <tr>
-                                <th>ID</th>
-                                <th>name</th>
-                                <th>email</th>
+                                <th>名前</th>
+                                <th>メールアドレス</th>
+                                <th>年齢</th>
                                 <th>編集</th>
                                 <th>削除</th>
                             </tr>
@@ -44,12 +45,13 @@ async function loadUsers() {
     //ユーザ更新
     document.querySelectorAll(".editBtn").forEach(btn => {
         btn.addEventListener("click", () => {
-            const id = btn.dataset.id;
+            const id   = btn.dataset.id;
             const user = json.find( u => u.id == id );
 
-            document.getElementById("userid").value = user.id;
-            document.getElementById("username").value = user.name;
+            document.getElementById("userid").value    = user.id;
+            document.getElementById("username").value  = user.name;
             document.getElementById("useremail").value = user.email;
+            document.getElementById("userage").value   = user.age;
         });
     });
 
@@ -57,10 +59,10 @@ async function loadUsers() {
     document.querySelectorAll(".deleBtn").forEach( btn => {
         btn.addEventListener("click", async () => {
             const id = btn.dataset.id;
-            //console.log(id);
+            const name = btn.dataset.name;
             //削除してよいか聞く
-            if(window.confirm("ID：" + id + "のユーザを削除してよいですか")){
-                const res = await fetch(`http://localhost:3000/api/users/delete/${id}`,{
+            if(window.confirm("名前：" + name + "のユーザを削除してよいですか")){
+                const res = await fetch(`http://localhost:3000/api/users/${id}`,{
                     method: "DELETE"
                 });
 
@@ -88,17 +90,19 @@ document.getElementById("usercreatefrom").addEventListener("submit", async(e) =>
     const id    = document.getElementById("userid").value;
     const name  = document.getElementById("username").value;
     const email = document.getElementById("useremail").value;
+    const age   = document.getElementById("userage").value;
 
     //登録か更新の分岐
     if( id === ""){
-        const res = await fetch("http://localhost:3000/api/users/create",{
+        const res = await fetch("http://localhost:3000/api/users/",{
             method: "POST",
             headers: {
                 "Content-Type":"application/json"
             },
             body: JSON.stringify({
-                name: name,
-                email: email
+                name:  name,
+                email: email,
+                age:   age
             })
         });
 
@@ -106,14 +110,15 @@ document.getElementById("usercreatefrom").addEventListener("submit", async(e) =>
         message(result.message);
 
     }else{
-        const res = await fetch(`http://localhost:3000/api/users/update/${id}`,{
+        const res = await fetch(`http://localhost:3000/api/users/${id}`,{
             method: "PUT",
             headers: {
                 "Content-Type":"application/json"
             },
             body: JSON.stringify({
-                name: name,
-                email: email
+                name:  name,
+                email: email,
+                age:   age
             })
         });
 
@@ -122,9 +127,10 @@ document.getElementById("usercreatefrom").addEventListener("submit", async(e) =>
     }
 
     //入力後クリア
-    document.getElementById("userid").value = "";
-    document.getElementById("username").value = "";
+    document.getElementById("userid").value    = "";
+    document.getElementById("username").value  = "";
     document.getElementById("useremail").value = "";
+    document.getElementById("userage").value   = "";
 
     //反映
     loadUsers();

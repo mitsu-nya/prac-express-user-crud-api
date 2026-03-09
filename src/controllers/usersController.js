@@ -1,29 +1,31 @@
-let users = require("../models/users");
+const xss = require("xss");
+const { PrismaClient } = require("@prisma/client");
+const prisma = new PrismaClient();
 
 //ユーザ一覧を返す
-exports.getUsers = (req,res) => {
-    res.status(200).json(users);
+exports.getUsers = async (req,res) => {
+    try{
+        const users = await prisma.users.findMany();
+        res.status(200).json(users);
+    }catch(e){
+        res.status(500).json({error:"Server Error"});
+    }
 };
 
 //ユーザを登録する
-exports.postUsers = (req,res) => {
-    const data = req.body;
-
-    //格納する
+exports.postUsers = async (req,res) => {
     try{
-        //バリデーション
-        if( !data.name || !data.email){
+        const name  = xss(req.body.name);
+        const email = xss(req.body.email);
+        const age   = req.body.age ? Number(req.body.age) : null;
+
+        if( !name || !email ){
             return res.status(400).json({error:"nameとメールアドレスは必須です"});
         }
 
-        const id = users.length > 0 ? users[users.length - 1].id + 1 : 1;
-        const user = {
-            id: id,
-            name: data.name,
-            email: data.email
-        };
-
-        users.push(user);
+        const user = await prisma.users.create({
+            data: { name, email, age }
+        });
 
         res.status(200).json({
             message:"User Create",
@@ -36,33 +38,26 @@ exports.postUsers = (req,res) => {
 };
 
 //ユーザ更新
-exports.putUsers = (req,res) => {
-    const id = Number(req.params.id);
-    const data = req.body;
+exports.putUsers = async (req,res) => {
 
     try{
         //バリデーションチェック
-        //URLのidは数値
-        if( Number.isNaN(id) ){
-            res.status(400).json({err:"id invaild"});
-            return;
-        }
+        const id    = req.params.id;
+        const name  = xss(req.body.name);
+        const email = xss(req.body.email);
+        const age   = req.body.age ? Number(req.body.age) : null;
+
         //nameとemailは必須
-        if( !data.name || !data.email ){
+        if( !name || !email ){
             res.status(400).json({err:"name or email invaild"});
             return;
         }
 
-        //ユーザ検索
-        const user = users.find(item => item.id === id);
-
-        if(!user){
-            return res.status(404).json({err:"User Not Found"});
-        }
-
         //ユーザ更新
-        user.name  = data.name;
-        user.email = data.email;
+        const user = await prisma.users.update({
+            where: { id },
+            data: {name, email, age}
+        });
 
         res.status(200).json({
             message:"User Update",
@@ -75,13 +70,13 @@ exports.putUsers = (req,res) => {
 };
 
 //ユーザ削除
-exports.deleteUsers = (req,res) => {
-    const id = Number(req.params.id);
-
-    if( Number.isNaN(id)) return res.status(400).json({err:"ID is invaild"});
+exports.deleteUsers = async (req,res) => {
+    const id = req.params.id;
 
     try{
-        users = users.filter(item => item.id !== id);
+        await prisma.users.delete({
+            where: {id}
+        });
 
         res.status(200).json({message: "User delete"});
 

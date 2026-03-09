@@ -21,3 +21,13 @@ Thumbs.db
 #Optional: build output
 dist/
 build/
+
+# Prisma generated files
+/src/generated/prisma
+
+# Database files
+*.sqlite
+*.sqlite3
+*.db
+*.db3
+*.sql

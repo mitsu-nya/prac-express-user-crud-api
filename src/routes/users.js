@@ -6,12 +6,12 @@ const usersController = require("../controllers/usersController");
 router.get("/", usersController.getUsers);
 
 //ユーザ登録
-router.post("/create", usersController.postUsers);
+router.post("/", usersController.postUsers);
 
 //ユーザ更新
-router.put("/update/:id", usersController.putUsers);
+router.put("/:id", usersController.putUsers);
 
 //ユーザ削除
-router.delete("/delete/:id", usersController.deleteUsers);
+router.delete("/:id", usersController.deleteUsers);
 
 module.exports = router;
